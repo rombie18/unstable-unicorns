@@ -3,100 +3,91 @@ import json
 
 class Game:
     def __init__(self):
-        self.players : list(Player) = []
+        self.players = []
         
-        self.nursery : CardSpace = None
-        self.deck : CardSpace = None
-        self.discard_pile : CardSpace = None
+        self.nursery = []
+        self.deck  = []
+        self.discard_pile = []
         
-        self.active_player : Player = None
+        self.active_player = None
         self.turn_phase = None
-        
-        self.start()
-        
+                
     def start(self):
-        # Check if game ready to start
-        #assert len(self.players) >= 2
-        #assert len(self.players) < 6
         
-        # Initialise game
-        cards = []
         with open('cards.json', 'r') as file:
             file_contents = file.read()
-            for card in json.loads(file_contents):
-                cards.append(
-                    Card(
-                        card['name'],
-                        card['type'],
-                        card['image']
-                    )
-                )
-        
-        # Seperate Baby Unicorn cards from other cards
-        baby_unicorn_cards = [item for item in cards if item == "BABY_UNICORN"]
-        
-        baby_unicorn_cards = []
-        for i in range(len(cards.copy())):
-            if cards[i].type == "BABY_UNICORN":
-                baby_unicorn_cards.append(cards.pop(i))
-        
-        # Shuffle the cards
-        random.shuffle(cards)
-        
-        # Deal each player 5 cards
-        for player in self.players:
-            for i in range(5):       
-                player.hand.add(cards.pop())
-                
-        # Place remaining cards in deck
-        self.deck = cards
-        
-        # Give each player Baby Unicorn card
-        for player in self.players:
-            player.stable.add(baby_unicorn_cards.pop())
+            cards = json.loads(file_contents)
             
-        # Place remaining Baby Unicorn cards in the Nursery
+        random.shuffle(cards)
+            
+        baby_unicorn_cards = [card for card in cards if card['type'] == "BABY_UNICORN"]
+        not_baby_unicorn_cards = [card for card in cards if card['type'] != "BABY_UNICORN"]            
+        
+        for player in self.players:
+            player.stable.append(baby_unicorn_cards.pop())
+            for _ in range(5):
+                player.hand.append(not_baby_unicorn_cards.pop())
+            
         self.nursery = baby_unicorn_cards
-        
-        
-    def pause(self):
-        pass
+        self.deck = not_baby_unicorn_cards
     
-    def end(self):
-        pass
-    
-    def quit(self):
-        pass
-    
-    def save(self):
-        pass
-        
-    def add_player(self, player):
-        self.players.append(player)
-    
-    
-    
-class Card:
-    def __init__(self, name, type, image):
-        self.name = name
-        self.type = type
-        self.image = image
-    
-    def sacrifice(card):
-        pass
-    
-    def destroy(card):
-        pass
-        
-    def return_to_hand(card):
-        pass
+        self.active_player = random.choice(self.players)
+        self.turn_phase = "BEGINNING_OF_TURN"
 
-class CardSpace:
-    def __init__(self):
-        self.cards : list(Card) = []
         
-    def add(self, card):
-        self.cards.append(card)
+    def next_turn_phase(self):
+        if self.turn_phase == "BEGINNING_OF_TURN":
+            self.turn_phase = "DRAW"
+        elif self.turn_phase == "DRAW":
+            self.turn_phase = "ACTION"
+        elif self.turn_phase == "ACTION":
+            self.turn_phase = "END_OF_TURN"
+        elif self.turn_phase == "END_OF_TURN":
+            current_index = self.players.index(self.active_player)
+            if current_index == len(self.players - 1):
+                self.active_player = self.players[0]
+            else:
+                self.active_player = self.players[current_index + 1]
+            self.turn_phase = "BEGINNING_OF_TURN"
+            
+    def draw_card(self):
+        game.active_player.hand.append(game.deck.pop())
+    
+    
+class Player:
+    def __init__(self, name):
+        self.name = name
+        self.hand = []
+        self.stable = []
+        
+        
         
         
 game = Game()
+
+player1 = Player("Player 1")
+player2 = Player("Player 2")
+
+game.players.append(player1)
+game.players.append(player2)
+
+game.start()
+
+## Beginning of turn phase
+# Click on card in stable to execute effect, if any
+#game.apply_effect(card)
+
+game.next_turn_phase()
+
+## Draw phase
+# Draw a card
+game.draw_card()
+
+game.next_turn_phase()
+
+## Action phase
+# Play a card from hand or draw card
+game.draw_card()
+
+## End of turn phase
+# Discard until number of cards in hand <= 7

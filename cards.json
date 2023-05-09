@@ -15,10 +15,318 @@
         "image": "images/cards/baby-eenhoorn-3.jpg"
     },
     {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-4.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-5.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-6.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-7.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-8.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-9.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-10.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-11.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-12.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-13.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-1.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-2.jpg"
+    },
+    {
+        "name": "SUPERSTOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-3.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-4.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-5.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-6.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-7.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-8.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-9.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-10.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-11.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-12.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-13.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-14.jpg"
+    },
+    {
+        "name": "STOP",
+        "type": "INSTANT",
+        "image": "images/cards/direct-effect-15.jpg"
+    },
+    {
+        "name": "SADISTISCH RITUEEL",
+        "type": "DOWNGRADE",
+        "image": "images/cards/downgrade-1.jpg"
+    },
+    {
+        "name": "KRAPPE STAL",
+        "type": "DOWNGRADE",
+        "image": "images/cards/downgrade-2.jpg"
+    },
+    {
+        "name": "PANDAMONIUM",
+        "type": "DOWNGRADE",
+        "image": "images/cards/downgrade-3.jpg"
+    },
+    {
+        "name": "STAL BUITEN GEBRUIK",
+        "type": "DOWNGRADE",
+        "image": "images/cards/downgrade-4.jpg"
+    },
+    {
+        "name": "VERTRAGING",
+        "type": "DOWNGRADE",
+        "image": "images/cards/downgrade-5.jpg"
+    },
+    {
+        "name": "VERBORGEN CAMERA",
+        "type": "DOWNGRADE",
+        "image": "images/cards/downgrade-6.jpg"
+    },
+    {
+        "name": "PRIKKELDRAAD",
+        "type": "DOWNGRADE",
+        "image": "images/cards/downgrade-7.jpg"
+    },
+    {
+        "name": "VERBLINDEND LICHT",
+        "type": "DOWNGRADE",
+        "image": "images/cards/downgrade-8.jpg"
+    },
+    {
         "name": "EENHOORN ORAKEL",
         "type": "MAGICAL_UNICORN",
         "image": "images/cards/magische-eenhoorn-1.jpg"
-        "effect": "",
-        "effect_initiator": "ON_STABLE_ENTER"
+    },
+    {
+        "name": "MOEDER GANS EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-2.jpg"
+    },
+    {
+        "name": "DUISTERE ENGEL EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-3.jpg"
+    },
+    {
+        "name": "KETTINGZAAG EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-4.jpg"
+    },
+    {
+        "name": "IRRITANTE VLIEGENDE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-5.jpg"
+    },
+    {
+        "name": "MAGISCHE KITTENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-6.jpg"
+    },
+    {
+        "name": "NEUSHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-7.jpg"
+    },
+    {
+        "name": "EENHOORN KONINGIN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-8.jpg"
+    },
+    {
+        "name": "VERLEIDELIJKE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-9.jpg"
+    },
+    {
+        "name": "HEBBERIGE VLIEGENDE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-10.jpg"
+    },
+    {
+        "name": "DODENBEZWERENDE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-11.jpg"
+    },
+    {
+        "name": "LAMAHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-12.jpg"
+    },
+    {
+        "name": "EXTREEM VERWOESTENDE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-13.jpg"
+    },
+    {
+        "name": "PRIK DE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-14.jpg"
+    },
+    {
+        "name": "KOLOSSALE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-15.jpg"
+    },
+    {
+        "name": "REGENBOOG EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-16.jpg"
+    },
+    {
+        "name": "AMERIHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-17.jpg"
+    },
+    {
+        "name": "MAGISCHE VLIEGENDE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-18.jpg"
+    },
+    {
+        "name": "SNELVLIEGENDE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-19.jpg"
+    },
+    {
+        "name": "IMPOSANTE VLIEGENDE EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-20.jpg"
+    },
+    {
+        "name": "EENHOORN FENIX",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-21.jpg"
+    },
+    {
+        "name": "MAISHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-22.jpg"
+    },
+    {
+        "name": "ZWARTE RIDDER EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-23.jpg"
+    },
+    {
+        "name": "HAAI MET EEN HOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-24.jpg"
+    },
+    {
+        "name": "VINNIGE NARWAL",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-25.jpg"
+    },
+    {
+        "name": "NARWAL TORPEDO",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-26.jpg"
+    },
+    {
+        "name": "AANTREKKELIJKE NARWAL",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-27.jpg"
+    },
+    {
+        "name": "MEERMIN EENHOORN",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-28.jpg"
+    },
+    {
+        "name": "DEFTIGE NARWAL",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-29.jpg"
+    },
+    {
+        "name": "DE GROTE NARWAL",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-30.jpg"
     }
 ]
