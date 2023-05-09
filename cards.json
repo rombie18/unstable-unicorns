@@ -1,0 +1,24 @@
+[
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-1.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-2.jpg"
+    },
+    {
+        "name": "BABY EENHOORN",
+        "type": "BABY_UNICORN",
+        "image": "images/cards/baby-eenhoorn-3.jpg"
+    },
+    {
+        "name": "EENHOORN ORAKEL",
+        "type": "MAGICAL_UNICORN",
+        "image": "images/cards/magische-eenhoorn-1.jpg"
+        "effect": "",
+        "effect_initiator": "ON_STABLE_ENTER"
+    }
+]

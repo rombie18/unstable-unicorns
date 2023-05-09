@@ -1,12 +1,5 @@
-"""
-Example code showing how to create a button,
-and the three ways to process button events.
-"""
 import arcade
 import arcade.gui
-from arcade.experimental.uislider import UISlider
-from arcade.gui import UIManager, UIAnchorWidget, UILabel
-from arcade.gui.events import UIOnChangeEvent
 from pyglet.image import load as pyglet_load
 
 SCREEN_WIDTH = 1280
@@ -14,7 +7,7 @@ SCREEN_HEIGHT = 720
 
 class MyWindow(arcade.Window):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Unstable Unicorns", resizable=True)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Unstable Unicorns", resizable=False)
 
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
@@ -24,7 +17,8 @@ class MyWindow(arcade.Window):
         self.set_icon(pyglet_load("images/icon.png"))
         self.background = arcade.load_texture("images/background.jpg")
 
-        self.v_box = arcade.gui.UIBoxLayout()
+        self.center_box = arcade.gui.UIBoxLayout()
+        self.bottom_box = arcade.gui.UIBoxLayout()
         
         default_style = {
             "font_name": ("calibri", "arial"),
@@ -47,16 +41,26 @@ class MyWindow(arcade.Window):
             font_name="Kenney Future",
             text_color=arcade.color.AMETHYST
         )
-        self.v_box.add(ui_text_label.with_space_around(bottom=60))
+        self.center_box.add(ui_text_label.with_space_around(bottom=60))
 
         start_button = arcade.gui.UIFlatButton(text="Spel starten", width=200, style=default_style)
-        self.v_box.add(start_button.with_space_around(bottom=20))
+        self.center_box.add(start_button.with_space_around(bottom=20))
 
         settings_button = arcade.gui.UIFlatButton(text="Instellingen", width=200, style=default_style)
-        self.v_box.add(settings_button.with_space_around(bottom=20))
+        self.center_box.add(settings_button.with_space_around(bottom=20))
         
         exit_button = arcade.gui.UIFlatButton(text="Afsluiten", width=200, style=default_style)
-        self.v_box.add(exit_button.with_space_around(bottom=20))
+        self.center_box.add(exit_button.with_space_around(bottom=20))
+        
+        ui_text_label = arcade.gui.UITextArea(
+            text="Semih Barmaksiz, Wout Rombouts",
+            width=226,
+            height=20,
+            font_size=8,
+            font_name="Kenney Future",
+            text_color=arcade.color.GRAY
+        )
+        self.bottom_box.add(ui_text_label.with_space_around(bottom=20))
 
         @start_button.event("on_click")
         def on_click_settings(event):
@@ -74,12 +78,18 @@ class MyWindow(arcade.Window):
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",
-                child=self.v_box)
+                child=self.center_box)
         )
         
-    def setup(self):
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="bottom",
+                child=self.bottom_box)
+        )
+        
         self.music = arcade.Sound("sounds/soundtrack.mp3", streaming=True)
-        self.current_player = self.music.play(0.5)
+        self.current_player = self.music.play(0.6)
         
     def on_draw(self):
         self.clear()
@@ -89,5 +99,4 @@ class MyWindow(arcade.Window):
 
 
 window = MyWindow()
-window.setup()
 arcade.run()
