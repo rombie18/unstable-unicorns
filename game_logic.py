@@ -11,11 +11,11 @@ class EffectHandler:
 
     def handle_effect(self, card: 'Card'):
 
-        logging.info("Applying effect '" + str(card.effect) + "'")
+        logging.info("Applying effect '%s'", card.effect)
 
         if card.effect == "discard_unicorn_draw":
-            card = self.game.ui.select_card(
-                self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
+            card = self.game.ui.select_card("Please select a Unicorn card to discard",
+                                            self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
             if card == None:
                 return
             self.game.current_player.stable.remove_card(card)
@@ -24,13 +24,14 @@ class EffectHandler:
             self.game.current_player.hand.add_card(card)
         elif card.effect == "max_5_unicorns_in_stable":
             if len(self.game.current_player.stable) > 5:
-                card = self.game.ui.select_card(
-                    self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
+                card = self.game.ui.select_card("You have more than 5 cards in your stable. Please select a Unicorn card to discard",
+                                                self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
                 if card == None:
                     return
                 self.game.current_player.stable.remove_card(card)
                 self.game.discard_pile.add_card(card)
         elif card.effect == "invincible_unicorns":
+            # TODO
             cards = self.game.current_player.hand.get_cards_by_class_type(
                 UnicornCard)
             cards.extend(
@@ -38,6 +39,7 @@ class EffectHandler:
             for card in cards:
                 card.invincible = True
         elif card.effect == "unable_upgrade":
+            # TODO
             cards = self.game.current_player.hand.get_cards_by_class_type(
                 UpgradeCard)
             for card in cards:
@@ -47,21 +49,23 @@ class EffectHandler:
             for _ in range(3):
                 card = self.game.deck.draw_card()
                 cards.append(card)
-            self.game.current_player.hand.add_card(cards.pop(0))
+            card = self.game.ui.select_card("Please choose one of 3 cards from the top of the deck", cards)
+            cards.remove(card)
+            self.game.current_player.hand.add_card(card)
             self.game.deck.add_cards(cards)
             self.game.deck.shuffle()
         elif card.effect == "baby_unicorn_to_stable":
             card = self.game.nursery.draw_card()
             self.game.current_player.stable.add_card(card)
         elif card.effect == "discard_unicorn_unicorn_from_discard_pile":
-            card = self.game.ui.select_card(
-                self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
+            card = self.game.ui.select_card("Please select Unicorn card to discard",
+                                            self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
             if card == None:
                 return
             self.game.current_player.stable.remove_card(card)
             self.game.discard_pile.add_card(card)
-            card = self.game.ui.select_card(
-                self.game.discard_pile.get_cards_by_class_type(UnicornCard))
+            card = self.game.ui.select_card("Please choose a Unicorn card from the discard pile you wish to take",
+                                            self.game.discard_pile.get_cards_by_class_type(UnicornCard))
             if card == None:
                 return
             self.game.discard_pile.remove_card(card)
@@ -69,26 +73,28 @@ class EffectHandler:
         elif card.effect == "destroy_upgrade_or_discard_downgrade":
             options = ["Destroy Upgrade Card from a Player",
                        "Remove a Downgrade Card from your Stable"]
-            option = self.game.ui.select_option(options)
+            option = self.game.ui.select_option(
+                "Please make your choice", options)
             if option == options[0]:
-                player = self.game.ui.select_player(self.game.players)
-                card = self.game.ui.select_card(
-                    player.stable.get_cards_by_class_type(UpgradeCard))
+                player = self.game.ui.select_player(
+                    "Please choose a player to apply the effect to", self.game.players)
+                card = self.game.ui.select_card("Please select a card to destroy",
+                                                player.stable.get_cards_by_class_type(UpgradeCard))
                 if card == None:
                     return
                 player.stable.remove_card(card)
                 self.game.discard_pile.add_card(card)
             else:
-                card = self.game.ui.select_card(
-                    self.game.current_player.stable.get_cards_by_class_type(DowngradeCard))
+                card = self.game.ui.select_card("Please select a card to discard",
+                                                self.game.current_player.stable.get_cards_by_class_type(DowngradeCard))
                 if card == None:
                     return
                 self.game.current_player.stable.remove_card(card)
                 self.game.discard_pile.add_card(card)
         elif card.effect == "everyone_discard":
             for player in self.game.players:
-                card = self.game.ui.select_card(
-                    self.game.current_player.hand.get_cards())
+                card = self.game.ui.select_card(str(player) + ", please select a card to discard",
+                                                self.game.current_player.hand.get_cards())
                 if card == None:
                     return
                 player.hand.remove_card(card)
@@ -97,13 +103,15 @@ class EffectHandler:
             self.game.discard_pile.clear()
             self.game.deck.shuffle()
         elif card.effect == "swap_stable":
-            card1 = self.game.ui.select_card(
-                self.game.current_player.stable.get_cards())
+            card1 = self.game.ui.select_card("Please select a card to swap with another player",
+                                             self.game.current_player.stable.get_cards())
             if card1 == None:
                 return
             self.game.current_player.stable.remove_card(card1)
-            player = self.game.ui.select_player(self.game.players)
-            card2 = self.game.ui.select_card(player.stable.get_cards())
+            player = self.game.ui.select_player(
+                "Please select player you wish to swap the card with", self.game.players)
+            card2 = self.game.ui.select_card(
+                "Please select a card from the players stable you want to swap with your card", player.stable.get_cards())
             if card2 == None:
                 return
             player.stable.remove_card(card2)
@@ -111,29 +119,30 @@ class EffectHandler:
             player.stable.add_card(card1)
         elif card.effect == "everyone_stable_to_hand":
             for player in self.game.players:
-                card = self.game.ui.select_card(
-                    self.game.current_player.stable.get_cards())
+                card = self.game.ui.select_card(str(player) + ", please select a card to move to your hand",
+                                                self.game.current_player.stable.get_cards())
                 if card == None:
                     return
                 player.stable.remove_card(card)
                 player.hand.add_card(card)
         elif card.effect == "discard2_destroy_unicorn":
             for _ in range(2):
-                card = self.game.ui.select_card(
-                    self.game.current_player.hand.get_cards())
+                card = self.game.ui.select_card("Please select a card to discard",
+                                                self.game.current_player.hand.get_cards())
                 if card == None:
                     return
                 self.game.current_player.hand.remove_card(card)
                 self.game.discard_pile.add_card(card)
-            player = self.game.ui.select_player(self.game.players)
-            card = self.game.ui.select_card(
-                player.stable.get_cards_by_class_type(UnicornCard))
+            player = self.game.ui.select_player(
+                "Please select a player to apply the effect to", self.game.players)
+            card = self.game.ui.select_card("Please select a Unicorn card to destroy",
+                                            player.stable.get_cards_by_class_type(UnicornCard))
             if card == None:
                 return
             player.stable.remove_card(card)
         elif card.effect == "discard_draw":
-            card = self.game.ui.select_card(
-                self.game.current_player.hand.get_cards())
+            card = self.game.ui.select_card("Please select a card to discard",
+                                            self.game.current_player.hand.get_cards())
             if card == None:
                 return
             self.game.current_player.hand.remove_card(card)
@@ -272,7 +281,7 @@ class Hand(CardSpace):
         if isinstance(card, BabyUnicornCard):
             logging.error("Failed to add card '%s' to Hand", card)
             raise RuntimeError("Failed to add card '" + str(card) +
-                            "' to Hand. Baby Unicorn cards can only be added to a Stable or the Nursery!")
+                               "' to Hand. Baby Unicorn cards can only be added to a Stable or the Nursery!")
         self.cards.append(card)
 
 
@@ -306,7 +315,7 @@ class Deck(CardSpace):
         if isinstance(card, BabyUnicornCard):
             logging.error("Failed to add card '%s' to Deck", card)
             raise RuntimeError("Failed to add card '" + str(card) +
-                            "' to Deck. Baby Unicorn cards can only be added to a Stable or the Nursery!")
+                               "' to Deck. Baby Unicorn cards can only be added to a Stable or the Nursery!")
         self.cards.append(card)
 
 
@@ -316,7 +325,7 @@ class DiscardPile(CardSpace):
         if isinstance(card, BabyUnicornCard):
             logging.error("Failed to add card '%s' to Discard Pile", card)
             raise RuntimeError("Failed to add card '" + str(card) +
-                            "' to Discard Pile. Baby Unicorn cards can only be added to a Stable or the Nursery!")
+                               "' to Discard Pile. Baby Unicorn cards can only be added to a Stable or the Nursery!")
         self.cards.append(card)
 
 
@@ -331,7 +340,7 @@ class Nursery(CardSpace):
         if not isinstance(card, BabyUnicornCard):
             logging.error("Failed to add card '%s' to Nursery", card)
             raise RuntimeError("Failed to add card '" + str(card) +
-                            "' to Nursery. Can only add Baby Unicorn cards!")
+                               "' to Nursery. Can only add Baby Unicorn cards!")
         self.cards.append(card)
 
 
@@ -434,26 +443,36 @@ class Game:
 
         # Phase 3: Play or draw a card
         logging.info("Turn phase 3: Play or Draw")
-        card = self.current_player.hand.cards[0]
-        logging.info("Player selected %s", card)
-        if isinstance(card, MagicCard):
-            # If card is a Magic card, apply effect and move card to discard pile
-            self.current_player.remove_from_hand(card)
-            self.discard_pile.add_card(card)
-            self.effect_handler.handle_effect(card)
-        elif isinstance(card, MagicalUnicornCard):
-            # If card is a Magical Unicorn card, move card to stable and apply effect
-            self.current_player.remove_from_hand(card)
-            self.current_player.stable.add_card(card)
-            self.effect_handler.handle_effect(card)
-        elif isinstance(card, (DowngradeCard, UpgradeCard)):
-            # If card is Upgrade or Downgrade, move card to selected player stable
-            self.current_player.remove_from_hand(card)
-            self.current_player.add_to_stable(card)
-        elif isinstance(card, BasicUnicornCard):
-            # If card is Basic Unicorn, move card to stable
-            self.current_player.remove_from_hand(card)
-            self.current_player.add_to_stable(card)
+        options = ["Play a card", "Draw a card"]
+        option = self.ui.select_option(
+            "Do you want to play a card or draw a card?", options)
+        if option == options[0]:
+            card = self.ui.select_card(
+                "Please pick a card to play", self.current_player.hand.get_cards())
+            logging.info("Player selected %s", card)
+            if isinstance(card, MagicCard):
+                # If card is a Magic card, apply effect and move card to discard pile
+                self.current_player.remove_from_hand(card)
+                self.discard_pile.add_card(card)
+                self.effect_handler.handle_effect(card)
+            elif isinstance(card, MagicalUnicornCard):
+                # If card is a Magical Unicorn card, move card to stable and apply effect
+                self.current_player.remove_from_hand(card)
+                self.current_player.stable.add_card(card)
+                self.effect_handler.handle_effect(card)
+            elif isinstance(card, (DowngradeCard, UpgradeCard)):
+                # If card is Upgrade or Downgrade, move card to selected player stable
+                player = self.ui.select_player(
+                    "Please choose a player to put the Up/Downgrade card in their stable", self.players)
+                self.current_player.remove_from_hand(card)
+                player.add_to_stable(card)
+            elif isinstance(card, BasicUnicornCard):
+                # If card is Basic Unicorn, move card to stable
+                self.current_player.remove_from_hand(card)
+                self.current_player.add_to_stable(card)
+        else:
+            card = self.deck.draw_card()
+            self.current_player.add_to_hand(card)
 
         # Phase 4: Discard until hand does not exceed 7 cards
         logging.info("Turn phase 4: Discard until max 7")
@@ -485,13 +504,16 @@ class UI:
     def display_error(self, message: str):
         pass
 
-    def select_card(self, cards: 'list[Card]') -> 'Card':
+    def display_message(self, message: str):
         pass
 
-    def select_player(self, players: 'list[Player]') -> 'Player':
+    def select_card(self, message: str, cards: 'list[Card]') -> 'Card':
         pass
 
-    def select_option(self, options: 'list[str]') -> str:
+    def select_player(self, message: str, players: 'list[Player]') -> 'Player':
+        pass
+
+    def select_option(self, message: str, options: 'list[str]') -> str:
         pass
 
 
@@ -500,42 +522,45 @@ class CLI(UI):
     def display_error(self, message: str):
         logging.error(message)
 
-    def select_card(self, cards: 'list[Card]') -> 'Card':
+    def display_message(self, message: str):
+        logging.info(message)
+
+    def select_card(self, message: str, cards: 'list[Card]') -> 'Card':
         if len(cards) == 0:
             logging.warning("There are no valid Cards to select from")
             return
 
         questions = [
             inquirer.List('card',
-                          message="Please choose a Card",
+                          message=message,
                           choices=cards,
                           ),
         ]
         answers = inquirer.prompt(questions)
         return answers["card"]
 
-    def select_player(self, players: 'list[Player]') -> 'Player':
+    def select_player(self, message: str, players: 'list[Player]') -> 'Player':
         if len(players) == 0:
             logging.warning("There are no valid Players to select from")
             return
 
         questions = [
             inquirer.List('player',
-                          message="Please choose a Player",
+                          message=message,
                           choices=players,
                           ),
         ]
         answers = inquirer.prompt(questions)
         return answers["player"]
 
-    def select_option(self, options: 'list[str]') -> str:
+    def select_option(self, message: str, options: 'list[str]') -> str:
         if len(options) == 0:
             logging.warning("There are no valid Options to select from")
             return
 
         questions = [
             inquirer.List('option',
-                          message="Please choose an Option",
+                          message=message,
                           choices=options,
                           ),
         ]
