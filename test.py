@@ -1,6 +1,7 @@
 import random
 import json
 import logging
+from typing import Type
 import inquirer
 
 
@@ -14,7 +15,7 @@ class EffectHandler:
 
         if card.effect == "discard_unicorn_draw":
             card = self.game.ui.select_card(
-                self.game.current_player.stable.get_cards_by_type(UnicornCard))
+                self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
             if card == None:
                 return
             self.game.current_player.stable.remove_card(card)
@@ -24,25 +25,25 @@ class EffectHandler:
         elif card.effect == "max_5_unicorns_in_stable":
             if len(self.game.current_player.stable) > 5:
                 card = self.game.ui.select_card(
-                    self.game.current_player.stable.get_cards_by_type(UnicornCard))
+                    self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
                 if card == None:
                     return
                 self.game.current_player.stable.remove_card(card)
                 self.game.discard_pile.add_card(card)
         elif card.effect == "invincible_unicorns":
-            cards = self.game.current_player.hand.get_cards_by_type(
+            cards = self.game.current_player.hand.get_cards_by_class_type(
                 UnicornCard)
             cards.extend(
-                self.game.current_player.stable.get_cards_by_type(UnicornCard))
+                self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
             for card in cards:
                 card.invincible = True
         elif card.effect == "unable_upgrade":
-            cards = self.game.current_player.hand.get_cards_by_type(
+            cards = self.game.current_player.hand.get_cards_by_class_type(
                 UpgradeCard)
             for card in cards:
                 card.playable = False
         elif card.effect == "choose_top3_deck":
-            cards: list[Card] = []
+            cards: 'list[Card]' = []
             for _ in range(3):
                 card = self.game.deck.draw_card()
                 cards.append(card)
@@ -54,13 +55,13 @@ class EffectHandler:
             self.game.current_player.stable.add_card(card)
         elif card.effect == "discard_unicorn_unicorn_from_discard_pile":
             card = self.game.ui.select_card(
-                self.game.current_player.stable.get_cards_by_type(UnicornCard))
+                self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
             if card == None:
                 return
             self.game.current_player.stable.remove_card(card)
             self.game.discard_pile.add_card(card)
             card = self.game.ui.select_card(
-                self.game.discard_pile.get_cards_by_type(UnicornCard))
+                self.game.discard_pile.get_cards_by_class_type(UnicornCard))
             if card == None:
                 return
             self.game.discard_pile.remove_card(card)
@@ -72,14 +73,14 @@ class EffectHandler:
             if option == options[0]:
                 player = self.game.ui.select_player(self.game.players)
                 card = self.game.ui.select_card(
-                    player.stable.get_cards_by_type(UpgradeCard))
+                    player.stable.get_cards_by_class_type(UpgradeCard))
                 if card == None:
                     return
                 player.stable.remove_card(card)
                 self.game.discard_pile.add_card(card)
             else:
                 card = self.game.ui.select_card(
-                    self.game.current_player.stable.get_cards_by_type(DowngradeCard))
+                    self.game.current_player.stable.get_cards_by_class_type(DowngradeCard))
                 if card == None:
                     return
                 self.game.current_player.stable.remove_card(card)
@@ -91,7 +92,7 @@ class EffectHandler:
                 if card == None:
                     return
                 player.hand.remove_card(card)
-                game.discard_pile.add_card(card)
+                self.game.discard_pile.add_card(card)
             self.game.deck.add_cards(self.game.discard_pile.cards)
             self.game.discard_pile.clear()
             self.game.deck.shuffle()
@@ -126,7 +127,7 @@ class EffectHandler:
                 self.game.discard_pile.add_card(card)
             player = self.game.ui.select_player(self.game.players)
             card = self.game.ui.select_card(
-                player.stable.get_cards_by_type(UnicornCard))
+                player.stable.get_cards_by_class_type(UnicornCard))
             if card == None:
                 return
             player.stable.remove_card(card)
@@ -165,29 +166,26 @@ class Player:
         return self.name
 
     def add_to_hand(self, card: Card):
-        logging.debug("Adding card '" + str(card) +
-                      "' to hand of player '" + str(self) + "'")
+        logging.debug("Adding card '%s' to hand of player '%s'", card, self)
         self.hand.add_card(card)
 
     def remove_from_hand(self, card: Card):
-        logging.debug("Removing card '" + str(card) +
-                      "' from hand of player '" + str(self) + "'")
+        logging.debug(
+            "Removing card '%s' from hand of player '%s'", card, self)
         self.hand.remove_card(card)
 
     def add_to_stable(self, card: Card):
-        logging.debug("Adding card '" + str(card) +
-                      "' to stable of player '" + str(self) + "'")
+        logging.debug("Adding card '%s' to stable of player '%s'", card, self)
         self.stable.add_card(card)
 
     def remove_from_stable(self, card: Card):
-        logging.debug("Removing card '" + str(card) +
-                      "' from stable of player '" + str(self) + "'")
+        logging.debug(
+            "Removing card '%s' from stable of player '%s'", card, self)
         self.stable.remove_card(card)
 
 
 class UnicornCard(Card):
-    def __init__(self, name, image, effect, effect_trigger):
-        super().__init__(name, image, effect, effect_trigger)
+    pass
 
 
 class BasicUnicornCard(UnicornCard):
@@ -195,17 +193,11 @@ class BasicUnicornCard(UnicornCard):
         super().__init__(name, image, effect, effect_trigger)
         self.card_type = "basic_unicorn"
 
-    def play(self, player: Player):
-        player.add_to_stable(self)
-
 
 class BabyUnicornCard(UnicornCard):
     def __init__(self, name, image, effect, effect_trigger):
         super().__init__(name, image, effect, effect_trigger)
         self.card_type = "baby_unicorn"
-
-    def play(self, player: Player):
-        player.add_to_stable(self)
 
 
 class MagicalUnicornCard(UnicornCard):
@@ -213,19 +205,11 @@ class MagicalUnicornCard(UnicornCard):
         super().__init__(name, image, effect, effect_trigger)
         self.card_type = "magical_unicorn"
 
-    def play(self, player: Player):
-        player.add_to_stable(self)
-        player.check_for_unicorns_with_trigger_effect()
-
 
 class MagicCard(Card):
     def __init__(self, name, image, effect, effect_trigger):
         super().__init__(name, image, effect, effect_trigger)
         self.card_type = "magic"
-
-    def play(self, player: Player):
-        effect_handler = EffectHandler()
-        effect_handler.handle_effect(self.effect, player)
 
 
 class InstantCard(Card):
@@ -233,20 +217,11 @@ class InstantCard(Card):
         super().__init__(name, image, effect, effect_trigger)
         self.card_type = "instant"
 
-    def play(self, player: Player):
-        effect_handler = EffectHandler()
-        effect_handler.handle_effect(self.effect, player)
-
 
 class UpgradeCard(Card):
     def __init__(self, name, image, effect, effect_trigger):
         super().__init__(name, image, effect, effect_trigger)
         self.card_type = "upgrade"
-
-    def play(self, player: Player):
-        target_card = player.choose_card_from_stable()
-        if target_card is not None:
-            target_card.add_upgrade(self)
 
 
 class DowngradeCard(Card):
@@ -254,17 +229,12 @@ class DowngradeCard(Card):
         super().__init__(name, image, effect, effect_trigger)
         self.card_type = "downgrade"
 
-    def play(self, player: Player):
-        target_card = player.choose_card_from_stable()
-        if target_card is not None:
-            target_card.add_upgrade(self)
-
 
 class CardSpace:
     def __init__(self, cards=None):
         if cards == None:
             cards = []
-        self.cards: list[Card] = cards
+        self.cards: 'list[Card]' = cards
 
     def __len__(self) -> int:
         return len(self.cards)
@@ -289,35 +259,29 @@ class CardSpace:
         self.cards.remove(card)
         return card
 
-    def get_cards_by_type(self, type):
+    def get_cards_by_class_type(self, class_type: Type[Card]):
         cards = []
         for card in self.cards:
-            if isinstance(card, type):
+            if isinstance(card, class_type):
                 cards.append(card)
         return cards
 
 
 class Hand(CardSpace):
-    def __init__(self, cards=None):
-        super().__init__(cards)
-
     def add_card(self, card):
         if isinstance(card, BabyUnicornCard):
-            logging.error("Failed to add card '" + str(card) + "' to Hand")
-            raise Exception("Failed to add card '" + str(card) +
+            logging.error("Failed to add card '%s' to Hand", card)
+            raise RuntimeError("Failed to add card '" + str(card) +
                             "' to Hand. Baby Unicorn cards can only be added to a Stable or the Nursery!")
         self.cards.append(card)
 
 
 class Stable(CardSpace):
-    def __init__(self, cards=None):
-        super().__init__(cards)
-
     def add_card(self, card):
         if len(self.cards) < 7:
             self.cards.append(card)
         else:
-            raise Exception("Stable is full")
+            raise RuntimeError("Stable is full")
 
     def get_unicorn_count(self):
         count = 0
@@ -328,57 +292,45 @@ class Stable(CardSpace):
 
 
 class Deck(CardSpace):
-    def __init__(self, cards=None):
-        super().__init__(cards)
-
     def shuffle(self):
         logging.debug("Shuffling Deck")
         random.shuffle(self.cards)
 
     def draw_card(self) -> Card:
         card = self.cards.pop(0)
-        logging.debug("Drawing card '" + str(card) + "' from Deck")
+        logging.debug("Drawing card '%s' from Deck", card)
         return card
 
     def add_card(self, card: Card):
-        logging.debug("Adding card '" + str(card) + "' to Deck")
+        logging.debug("Adding card '%s' to Deck", card)
         if isinstance(card, BabyUnicornCard):
-            logging.error("Failed to add card '" + str(card) + "' to Deck")
-            raise Exception("Failed to add card '" + str(card) +
+            logging.error("Failed to add card '%s' to Deck", card)
+            raise RuntimeError("Failed to add card '" + str(card) +
                             "' to Deck. Baby Unicorn cards can only be added to a Stable or the Nursery!")
         self.cards.append(card)
 
 
 class DiscardPile(CardSpace):
-    def __init__(self, cards=None):
-        super().__init__(cards)
-
     def add_card(self, card: Card):
-        logging.debug("Adding card '" + str(card) + "' to Discard Pile")
+        logging.debug("Adding card '%s' to Discard Pile", card)
         if isinstance(card, BabyUnicornCard):
-            logging.error("Failed to add card '" +
-                          str(card) + "' to Discard Pile")
-            raise Exception("Failed to add card '" + str(card) +
+            logging.error("Failed to add card '%s' to Discard Pile", card)
+            raise RuntimeError("Failed to add card '" + str(card) +
                             "' to Discard Pile. Baby Unicorn cards can only be added to a Stable or the Nursery!")
         self.cards.append(card)
 
 
 class Nursery(CardSpace):
-    def __init__(self, cards=None):
-        super().__init__(cards)
-
     def draw_card(self) -> Card:
         card = self.cards.pop(0)
-        logging.debug("Drawing card '" + str(card) +
-                      "' from Nursery '" + str(self) + "'")
+        logging.debug("Drawing card '%s' from Nursery '%s'", card, self)
         return card
 
     def add_card(self, card: Card):
-        logging.debug("Adding card '" + str(card) +
-                      "' to Nursery '" + str(self) + "'")
+        logging.debug("Adding card '%s' to Nursery '%s'", card, self)
         if not isinstance(card, BabyUnicornCard):
-            logging.error("Failed to add card '" + str(card) + "' to Nursery")
-            raise Exception("Failed to add card '" + str(card) +
+            logging.error("Failed to add card '%s' to Nursery", card)
+            raise RuntimeError("Failed to add card '" + str(card) +
                             "' to Nursery. Can only add Baby Unicorn cards!")
         self.cards.append(card)
 
@@ -386,7 +338,7 @@ class Nursery(CardSpace):
 class Game:
     def __init__(self, ui, players):
         self.ui: UI = ui
-        self.players: list[Player] = players
+        self.players: 'list[Player]' = players
 
         self.effect_handler: EffectHandler = None
         self.current_player: Player = None
@@ -406,7 +358,7 @@ class Game:
         self.discard_pile = DiscardPile()
 
         # Read all cards from JSON and put in deck
-        with open('cards.json', 'r') as file:
+        with open('cards.json', 'r', encoding='utf-8') as file:
             file_contents = file.read()
             cards = json.loads(file_contents)
             card_objs = []
@@ -465,10 +417,9 @@ class Game:
     def start_turn(self):
         logging.info("Starting turn")
 
-        logging.info("Current player is '" + str(self.current_player) + "'")
-        logging.info("Player has stable '" +
-                     str(self.current_player.stable) + "'")
-        logging.info("Player has hand '" + str(self.current_player.hand) + "'")
+        logging.info("Current player is '%s'", self.current_player)
+        logging.info("Player has stable '%s'", self.current_player.stable)
+        logging.info("Player has hand '%s'", self.current_player.hand)
 
         # Phase 1: Apply effects in stable that trigger on the beginning of turn
         logging.info("Turn phase 1: Apply effects in stable")
@@ -484,7 +435,7 @@ class Game:
         # Phase 3: Play or draw a card
         logging.info("Turn phase 3: Play or Draw")
         card = self.current_player.hand.cards[0]
-        logging.info("Player selected " + str(card))
+        logging.info("Player selected %s", card)
         if isinstance(card, MagicCard):
             # If card is a Magic card, apply effect and move card to discard pile
             self.current_player.remove_from_hand(card)
@@ -522,8 +473,8 @@ class Game:
         current_index = self.players.index(self.current_player)
         next_index = (current_index + 1) % len(self.players)
         self.current_player = self.players[next_index]
-        logging.info("Advancing player '" + str(
-            self.players[current_index]) + "' to '" + str(self.players[next_index]) + "'")
+        logging.info("Advancing player '%s' to '%s'",
+                     self.players[current_index], self.players[next_index])
         logging.info("---")
 
 
@@ -545,8 +496,6 @@ class UI:
 
 
 class CLI(UI):
-    def __init__(self) -> None:
-        pass
 
     def display_error(self, message: str):
         logging.error(message)
@@ -594,16 +543,20 @@ class CLI(UI):
         return answers["option"]
 
 
-players = [
-    Player("Wout"),
-    Player("Semih"),
-    Player("Daan")
-]
+def main():
+    players = [
+        Player("Wout"),
+        Player("Semih"),
+        Player("Daan")
+    ]
 
-ui = CLI()
-game = Game(ui, players)
+    ui = CLI()
+    game = Game(ui, players)
 
-game.initialize_game()
+    game.initialize_game()
 
-while True:
-    game.start_turn()
+    while True:
+        game.start_turn()
+
+
+main()
