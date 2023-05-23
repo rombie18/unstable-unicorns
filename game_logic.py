@@ -49,7 +49,8 @@ class EffectHandler:
             for _ in range(3):
                 card = self.game.deck.draw_card()
                 cards.append(card)
-            card = self.game.ui.select_card("Please choose one of 3 cards from the top of the deck", cards)
+            card = self.game.ui.select_card(
+                "Please choose one of 3 cards from the top of the deck", cards)
             cards.remove(card)
             self.game.current_player.hand.add_card(card)
             self.game.deck.add_cards(cards)
