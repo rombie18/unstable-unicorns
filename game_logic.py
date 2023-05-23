@@ -439,11 +439,13 @@ class Game:
         for card in self.current_player.stable.get_cards():
             if card.effect_trigger == "on_turn_begin":
                 self.effect_handler.handle_effect(card)
+        self.ui.update()
 
         # Phase 2: Draw a card and add it to the current player's hand
         logging.info("Turn phase 2: Draw from Deck")
         card = self.deck.draw_card()
         self.current_player.add_to_hand(card)
+        self.ui.update()
 
         # Phase 3: Play or draw a card
         logging.info("Turn phase 3: Play or Draw")
@@ -477,12 +479,15 @@ class Game:
         else:
             card = self.deck.draw_card()
             self.current_player.add_to_hand(card)
+        self.ui.update()
 
         # Phase 4: Discard until hand does not exceed 7 cards
         logging.info("Turn phase 4: Discard until max 7")
         while len(self.current_player.hand) > 7:
-            self.current_player.hand.remove_card(
-                self.current_player.hand.cards[0])
+            card = self.ui.select_card(
+                "Please pick a card to discard until hand does not exceed 7", self.current_player.hand.get_cards())
+            self.current_player.hand.remove_card(card)
+            self.ui.update()
 
         # Check for victory conditions
         if self.current_player.stable.get_unicorn_count() >= 7:
@@ -578,10 +583,11 @@ class CLI(UI):
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 
-class GUI(arcade.Window, UI):
+class GUI(UI):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Unstable Unicorns", resizable=False, fullscreen=True)
-        self.set_icon(pyglet_load("images/icon.png"))
+        
+        self.window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Unstable Unicorns", resizable=False, fullscreen=True)
+        self.window.set_icon(pyglet_load("images/icon.png"))
 
         players = [
             Player("Wout"),
@@ -591,8 +597,12 @@ class GUI(arcade.Window, UI):
         self.game = Game(self, players)
 
         menu_view = MainMenuView(self.game)
-        self.show_view(menu_view)
+        self.window.show_view(menu_view)
         arcade.run()
+        
+    def update(self):
+        print("received update event")
+        self.window.current_view.on_draw()
 
 
 class MainMenuView(arcade.View):
@@ -610,7 +620,7 @@ class MainMenuView(arcade.View):
 
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
 
-        self.texture = arcade.load_texture("images/background.jpg")
+        self.texture = arcade.load_texture("images/background_menu.jpg")
 
         center_box = arcade.gui.UIBoxLayout()
         bottom_box = arcade.gui.UIBoxLayout()
@@ -706,7 +716,7 @@ class PauseMenuView(arcade.View):
 
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
 
-        self.texture = arcade.load_texture("images/background.jpg")
+        self.texture = arcade.load_texture("images/background_menu.jpg")
 
         center_box = arcade.gui.UIBoxLayout()
         bottom_box = arcade.gui.UIBoxLayout()
@@ -783,103 +793,31 @@ class PauseMenuView(arcade.View):
         self.manager.draw()
 
 
-PILE_COUNT = 27
-PILE_OPPONENT_A_1 = 1
-PILE_OPPONENT_A_2 = 2
-PILE_OPPONENT_A_3 = 3
-PILE_OPPONENT_A_4 = 4
-PILE_OPPONENT_A_5 = 5
-PILE_OPPONENT_A_6 = 6
-PILE_OPPONENT_A_7 = 7
-PILE_OPPONENT_B_1 = 8
-PILE_OPPONENT_B_2 = 9
-PILE_OPPONENT_B_3 = 10
-PILE_OPPONENT_B_4 = 11
-PILE_OPPONENT_B_5 = 12
-PILE_OPPONENT_B_6 = 13
-PILE_OPPONENT_B_7 = 14
-PILE_TABLE_1 = 15
-PILE_TABLE_2 = 16
-PILE_TABLE_3 = 17
-PILE_OWN_1 = 18
-PILE_OWN_2 = 19
-PILE_OWN_3 = 20
-PILE_OWN_4 = 21
-PILE_OWN_5 = 22
-PILE_OWN_6 = 23
-PILE_OWN_7 = 24
-PILE_OWN_8 = 25
-PILE_OWN_9 = 26
-PILE_OWN_10 = 27
+class CardSprite(arcade.Sprite):
 
-MAT_FACTOR = 1.25
-MAT_HEIGHT = 128 * MAT_FACTOR
-MAT_WIDTH = 92 * MAT_FACTOR
+    def __init__(self, card: Card):
+        self.card: Card = card
 
-X_FACTOR = 0.01 * SCREEN_WIDTH
-Y_FACTOR = X_FACTOR / 92 * 128
-
-Y1 = SCREEN_HEIGHT - MAT_HEIGHT / 2 - Y_FACTOR
-Y2 = Y1 - MAT_HEIGHT - Y_FACTOR
-Y3 = SCREEN_HEIGHT / 7 * 3
-Y4 = MAT_HEIGHT / 2 + Y_FACTOR
-
-X1 = MAT_WIDTH / 2 + X_FACTOR
-X3 = ((SCREEN_WIDTH - 3 * MAT_WIDTH - 2 * X_FACTOR) + MAT_WIDTH) / 2
-X4 = ((SCREEN_WIDTH - 10 * MAT_WIDTH - 9 * X_FACTOR) + MAT_WIDTH) / 2
-
-
-class TestCard(arcade.Sprite):
-    def __init__(self, group, number, scale = 0.12):
-        self.group = group
-        self.number = number
-        self.image_file_name = "images/all_cards_lowres/"+self.group+"-"+self.number+".jpg"
-        super().__init__(self.image_file_name, scale, hit_box_algorithm="None")
-
-    def getGroup(self):
-        return self.group
-
-    def getNumber(self):
-        return self.number
+        # Call the parent
+        super().__init__(self.card.image, 0.105, hit_box_algorithm="None")
 
 class GameView(arcade.View):
 
     def __init__(self, game: Game):
         super().__init__()
         self.game = game
-        self.texture = None
         self.manager = arcade.gui.UIManager()
-        self.background = arcade.load_texture("images/background.jpg")
-        self.card_list = None
-        self.held_cards = None
-        self.held_card_original_position = None
-        self.v_box = None
-        self.pile_mat_list = None
-        self.piles = None
-        
-        self.setup()
+        self.background = None
+        self.v_box = arcade.gui.UIBoxLayout()
+        self.h_box = arcade.gui.UIBoxLayout(vertical=False)
+        self.card_sprites = None
         
     def on_show(self):
-
-        # Sprite list with all the cards, no matter what pile they are in.
-        self.card_list = None
-
-        # List of cards we are dragging with the mouse
-        self.held_cards = None
-
-        # Original location of cards we are dragging with the mouse in case
-        # they have to go back.
-        self.held_card_original_position = None
-
+        
         self.manager.enable()
-
-        self.v_box = arcade.gui.UIBoxLayout()
-
-        # Sprite list with all the mats tha cards lay on.
-        self.pile_mat_list = None
-
-        self.piles = None
-
+        self.background = arcade.load_texture("images/background_game.jpg")
+        self.card_sprites = arcade.SpriteList()
+        
         default_style = {
             "font_name": ("calibri", "arial"),
             "font_size": 15,
@@ -893,18 +831,18 @@ class GameView(arcade.View):
         }
 
         spelregels_button = arcade.gui.UIFlatButton(text="Spelregels", width=200, style=default_style)
-        self.v_box.add(spelregels_button.with_space_around(bottom=10))
+        self.v_box.add(spelregels_button.with_space_around(bottom=10, top=20, right=20))
 
         exit_button = arcade.gui.UIFlatButton(text="Afsluiten", width=200, style=default_style)
-        self.v_box.add(exit_button.with_space_around(bottom=10))
+        self.v_box.add(exit_button.with_space_around(bottom=10, right=20))
+        
+        next_turn_phase_button = arcade.gui.UIFlatButton(text="Volgende fase", width=200, style=default_style)
+        self.h_box.add(next_turn_phase_button.with_space_around(right=10, bottom=20))
+        next_turn_phase_button.on_click = lambda event: self.game.start_turn()
 
-        @spelregels_button.event("on_click")
-        def on_click_settings(event):
-            print("Start:", event)
-
-        @exit_button.event("on_click")
-        def on_click_settings(event):
-            arcade.exit()
+        end_turn_button = arcade.gui.UIFlatButton(text="Beurt beëindigen", width=200, style=default_style)
+        self.h_box.add(end_turn_button.with_space_around(right=20, bottom=20))
+        end_turn_button.on_click = lambda event: self.game.next_player()
 
         self.manager.add(
             arcade.gui.UIAnchorWidget(
@@ -913,170 +851,85 @@ class GameView(arcade.View):
                 child=self.v_box)
         )
         
-    def setup(self):
-        # List of cards we are dragging with the mouse
-        self.held_cards = []
-
-        # Original location of cards we are dragging with the mouse in case
-        # they have to go back.
-        self.held_cards_original_position = []
-
-        # Sprite list with all the cards, no matter what pile they are in.
-        self.card_list = arcade.SpriteList()
-
-        # Create every card
-        for i in range(1,14):
-            card = TestCard("baby-eenhoorn" , str(i))
-            card.position = 500, 500
-            self.card_list.append(card)
-            
-        # Sprite list with all the mats the cards lay on.
-        self.pile_mat_list: arcade.SpriteList = arcade.SpriteList()
-
-        for pos1 in range(len(self.card_list)):
-            pos2 = random.randrange(len(self.card_list))
-            self.card_list.swap(pos1, pos2)
-
-        self.piles = [[] for _ in range(PILE_COUNT)]
-
-        #for card in self.card_list:
-        #    self.piles[PILE_TABLE_1].append(card)
-
-        for i in range(7):
-            pile = arcade.SpriteSolidColor(int(MAT_WIDTH), int(MAT_HEIGHT), arcade.color.BRIGHT_LILAC)
-            pile.position = X1 + i * (MAT_WIDTH + X_FACTOR), Y1
-            self.pile_mat_list.append(pile)
-
-        for i in range(7):
-            pile = arcade.SpriteSolidColor(int(MAT_WIDTH), int(MAT_HEIGHT), arcade.color.BRIGHT_LILAC)
-            pile.position = X1 + i * (MAT_WIDTH + X_FACTOR), Y2
-            self.pile_mat_list.append(pile)
-
-        for i in range(3):
-            pile = arcade.SpriteSolidColor(int(MAT_WIDTH), int(MAT_HEIGHT), arcade.color.BRIGHT_LILAC)
-            pile.position = X3 + i * (MAT_WIDTH + X_FACTOR) , Y3
-            self.pile_mat_list.append(pile)
-
-        for i in range(10):
-            pile = arcade.SpriteSolidColor(int(MAT_WIDTH), int(MAT_HEIGHT), arcade.color.BRIGHT_LILAC)
-            pile.position = X4 + i * (MAT_WIDTH + X_FACTOR), Y4
-            self.pile_mat_list.append(pile)
-        #print(self.pile_mat_list)
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="right",
+                anchor_y="bottom",
+                child=self.h_box)
+        )
+        
     def on_draw(self):
         self.clear()
-
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
-
-        # Draw the mats the cards go on to
-        self.pile_mat_list.draw()
-
-        # Draw the cards
-        self.card_list.draw()
-
+        
+        # Fill up player stable slots
+        for i, card in enumerate(self.game.players[0].stable.get_cards()):
+            card_sprite = CardSprite(card)
+            card_sprite.position = 58 + i*107, 1080-182
+            card_sprite.scale = 0.105
+            self.card_sprites.append(card_sprite)
+            
+        for i, card in enumerate(self.game.players[1].stable.get_cards()):
+            card_sprite = CardSprite(card)
+            card_sprite.position = 58 + i*107, 1080-380
+            card_sprite.scale = 0.105
+            self.card_sprites.append(card_sprite)
+            
+        for i, card in enumerate(self.game.players[2].stable.get_cards()):
+            card_sprite = CardSprite(card)
+            card_sprite.position = 58 + i*107, 1080-580
+            card_sprite.scale = 0.105
+            self.card_sprites.append(card_sprite)
+            
+        # Fill up player hand slots
+        for i, card in enumerate(self.game.current_player.hand.get_cards()):
+            card_sprite = CardSprite(card)
+            card_sprite.position = 258 + i*137, 1080-950
+            card_sprite.scale = 0.14
+            self.card_sprites.append(card_sprite)
+            
+        # Fill up deck slot
+        for i, card in enumerate(self.game.deck.get_cards()):
+            card_sprite = CardSprite(card)
+            card_sprite.position = 1254, 1080-411
+            card_sprite.scale = 0.185
+            self.card_sprites.append(card_sprite)
+            
+        # Fill up deck slot
+        for i, card in enumerate(self.game.discard_pile.get_cards()):
+            card_sprite = CardSprite(card)
+            card_sprite.position = 1440, 1080-411
+            card_sprite.scale = 0.185
+            self.card_sprites.append(card_sprite)
+            
+        # Fill up deck slot
+        for i, card in enumerate(self.game.nursery.get_cards()):
+            card_sprite = CardSprite(card)
+            card_sprite.position = 1625, 1080-411
+            card_sprite.scale = 0.185
+            self.card_sprites.append(card_sprite)
+            
         self.manager.draw()
+        self.card_sprites.draw()
 
-    def pull_to_top(self, card: arcade.Sprite):
-        """ Pull card to top of rendering order (last to render, looks on-top) """
-
-        # Remove, and append to the end
-        self.card_list.remove(card)
-        self.card_list.append(card)
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
 
         # Get list of cards we've clicked on
-        cards = arcade.get_sprites_at_point((x, y), self.card_list)
+        cards = arcade.get_sprites_at_point((x, y), self.card_sprites)
 
-        # Have we clicked on a card?
-        if len(cards) > 0:
+        # # Have we clicked on a card?
+        # if len(cards) > 0:
 
-            # Might be a stack of cards, get the top one
-            primary_card = cards[-1]
+        #     # Might be a stack of cards, get the top one
+        #     primary_card = cards[-1]
 
-            # All other cases, grab the face-up card we are clicking on
-            self.held_cards = [primary_card]
-            # Save the position
-            self.held_cards_original_position = [self.held_cards[0].position]
-            # Put on top in drawing order
-            self.pull_to_top(self.held_cards[0])
-
-    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
-        """ User moves mouse """
-
-        # If we are holding cards, move them with the mouse
-        for card in self.held_cards:
-            card.center_x += dx
-            card.center_y += dy
-
-    def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
-        """ Called when the user presses a mouse button. """
-
-        # If we don't have any cards, who cares
-        if len(self.held_cards) == 0:
-            return
-
-        # Find the closest pile, in case we are in contact with more than one
-        pile, distance = arcade.get_closest_sprite(self.held_cards[0], self.pile_mat_list)
-        reset_position = True
-
-        # See if we are in contact with the closest pile
-        if arcade.check_for_collision(self.held_cards[0], pile):
-
-            # For each held card, move it to the pile we dropped on
-            for i, dropped_card in enumerate(self.held_cards):
-                # Move cards to proper position
-                dropped_card.position = pile.center_x, pile.center_y
-
-            # Success, don't reset position of cards
-            reset_position = False
-
-        # Geen twee kaarten op dezelfde stapel
-        new_card_list = []
-        for card in self.card_list:
-            if card != self.held_cards[0]:
-                new_card_list.append(card)
-
-        for i in range (1,len(self.card_list)):
-            if arcade.check_for_collision(self.held_cards[0], new_card_list[i-1]):
-                reset_position = True
-
-        for i in range (0,17):
-            if arcade.check_for_collision(self.held_cards[0], self.pile_mat_list[i]):
-                reset_position = True
-
-            # Release on top play pile? And only one card held?
-        if reset_position:
-            # Where-ever we were dropped, it wasn't valid. Reset the each card's position
-            # to its original spot.
-            for pile_index, card in enumerate(self.held_cards):
-                card.position = self.held_cards_original_position[pile_index]
-
-        # We are no longer holding cards
-        self.held_cards = []
-
-    def get_pile_for_card(self, card):
-        """ What pile is this card in? """
-        for index, pile in enumerate(self.piles):
-            if card in pile:
-                return index
-
-    def remove_card_from_pile(self, card):
-        """ Remove card from whatever pile it was in. """
-        for pile in self.piles:
-            if card in pile:
-                pile.remove(card)
-                break
-
-    def move_card_to_new_pile(self, card, pile_index):
-        """ Move the card to a new pile """
-        self.remove_card_from_pile(card)
-        self.piles[pile_index].append(card)
-
-    def on_show(self):
-        self.manager.enable()
-
-        self.texture = arcade.load_texture("images/background.jpg")
+        #     # All other cases, grab the face-up card we are clicking on
+        #     self.held_cards = [primary_card]
+        #     # Save the position
+        #     self.held_cards_original_position = [self.held_cards[0].position]
+        #     # Put on top in drawing order
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE:
