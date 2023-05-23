@@ -603,6 +603,54 @@ class GUI(UI):
     def update(self):
         print("received update event")
         self.window.current_view.on_draw()
+        
+    def display_error(self, message: str):
+        logging.error(message)
+
+    def display_message(self, message: str):
+        logging.info(message)
+
+    def select_card(self, message: str, cards: 'list[Card]') -> 'Card':
+        if len(cards) == 0:
+            logging.warning("There are no valid Cards to select from")
+            return
+
+        questions = [
+            inquirer.List('card',
+                          message=message,
+                          choices=cards,
+                          ),
+        ]
+        answers = inquirer.prompt(questions)
+        return answers["card"]
+
+    def select_player(self, message: str, players: 'list[Player]') -> 'Player':
+        if len(players) == 0:
+            logging.warning("There are no valid Players to select from")
+            return
+
+        questions = [
+            inquirer.List('player',
+                          message=message,
+                          choices=players,
+                          ),
+        ]
+        answers = inquirer.prompt(questions)
+        return answers["player"]
+
+    def select_option(self, message: str, options: 'list[str]') -> str:
+        if len(options) == 0:
+            logging.warning("There are no valid Options to select from")
+            return
+
+        questions = [
+            inquirer.List('option',
+                          message=message,
+                          choices=options,
+                          ),
+        ]
+        answers = inquirer.prompt(questions)
+        return answers["option"]
 
 
 class MainMenuView(arcade.View):
@@ -869,17 +917,32 @@ class GameView(arcade.View):
             card_sprite.scale = 0.105
             self.card_sprites.append(card_sprite)
             
+        arcade.draw_text(self.game.players[0].name,
+                        780,
+                        1080-153,
+                        arcade.color.BLACK)
+            
         for i, card in enumerate(self.game.players[1].stable.get_cards()):
             card_sprite = CardSprite(card)
             card_sprite.position = 58 + i*107, 1080-380
             card_sprite.scale = 0.105
             self.card_sprites.append(card_sprite)
             
+        arcade.draw_text(self.game.players[1].name,
+                        808,
+                        1080-369,
+                        arcade.color.BLACK)
+            
         for i, card in enumerate(self.game.players[2].stable.get_cards()):
             card_sprite = CardSprite(card)
             card_sprite.position = 58 + i*107, 1080-580
             card_sprite.scale = 0.105
             self.card_sprites.append(card_sprite)
+            
+        arcade.draw_text(self.game.players[2].name,
+                        765,
+                        1080-578,
+                        arcade.color.BLACK)
             
         # Fill up player hand slots
         for i, card in enumerate(self.game.current_player.hand.get_cards()):
