@@ -2,217 +2,217 @@
     {
         "name": "BABY EENHOORN",
         "type": "BABY_UNICORN",
-        "image": "images/cards/baby-eenhoorn-1.jpg",
+        "image": "resources/images/cards/baby-eenhoorn-1.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "BABY EENHOORN",
         "type": "BABY_UNICORN",
-        "image": "images/cards/baby-eenhoorn-2.jpg",
+        "image": "resources/images/cards/baby-eenhoorn-2.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "BABY EENHOORN",
         "type": "BABY_UNICORN",
-        "image": "images/cards/baby-eenhoorn-3.jpg",
+        "image": "resources/images/cards/baby-eenhoorn-3.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "BABY EENHOORN",
         "type": "BABY_UNICORN",
-        "image": "images/cards/baby-eenhoorn-4.jpg",
+        "image": "resources/images/cards/baby-eenhoorn-4.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "SADISTISCH RITUEEL",
         "type": "DOWNGRADE",
-        "image": "images/cards/downgrade-1.jpg",
+        "image": "resources/images/cards/downgrade-1.jpg",
         "effect": "discard_unicorn_draw",
         "effect_trigger": "on_turn_begin"
     },
     {
         "name": "KRAPPE STAL",
         "type": "DOWNGRADE",
-        "image": "images/cards/downgrade-2.jpg",
+        "image": "resources/images/cards/downgrade-2.jpg",
         "effect": "max_5_unicorns_in_stable",
         "effect_trigger": "on_stable_update"
     },
     {
         "name": "PANDAMONIUM",
         "type": "DOWNGRADE",
-        "image": "images/cards/downgrade-3.jpg",
+        "image": "resources/images/cards/downgrade-3.jpg",
         "effect": "invincible_unicorns",
         "effect_trigger": "once_reversable"
     },
     {
         "name": "STAL BUITEN GEBRUIK",
         "type": "DOWNGRADE",
-        "image": "images/cards/downgrade-4.jpg",
+        "image": "resources/images/cards/downgrade-4.jpg",
         "effect": "unable_upgrade",
         "effect_trigger": "once_reversable"
     },
     {
         "name": "EENHOORN ORAKEL",
         "type": "MAGICAL_UNICORN",
-        "image": "images/cards/magische-eenhoorn-1.jpg",
+        "image": "resources/images/cards/magische-eenhoorn-1.jpg",
         "effect": "choose_top3_deck",
         "effect_trigger": "on_stable_enter"
     },
     {
         "name": "MOEDER GANS EENHOORN",
         "type": "MAGICAL_UNICORN",
-        "image": "images/cards/magische-eenhoorn-2.jpg",
+        "image": "resources/images/cards/magische-eenhoorn-2.jpg",
         "effect": "baby_unicorn_to_stable",
         "effect_trigger": "on_stable_enter"
     },
     {
         "name": "DUISTERE ENGEL EENHOORN",
         "type": "MAGICAL_UNICORN",
-        "image": "images/cards/magische-eenhoorn-3.jpg",
+        "image": "resources/images/cards/magische-eenhoorn-3.jpg",
         "effect": "discard_unicorn_unicorn_from_discard_pile",
         "effect_trigger": "on_stable_enter"
     },
     {
         "name": "KETTINGZAAG EENHOORN",
         "type": "MAGICAL_UNICORN",
-        "image": "images/cards/magische-eenhoorn-4.jpg",
+        "image": "resources/images/cards/magische-eenhoorn-4.jpg",
         "effect": "destroy_upgrade_or_discard_downgrade",
         "effect_trigger": "on_stable_enter"
     },
     {
         "name": "MYTISCHE DRAAIKOLK",
         "type": "MAGICAL",
-        "image": "images/cards/magische-effect-1.jpg",
+        "image": "resources/images/cards/magische-effect-1.jpg",
         "effect": "everyone_discard",
         "effect_trigger": "once"
     },
     {
         "name": "EENHOORN RUILEN",
         "type": "MAGICAL",
-        "image": "images/cards/magische-effect-2.jpg",
+        "image": "resources/images/cards/magische-effect-2.jpg",
         "effect": "swap_stable",
         "effect_trigger": "once"
     },
     {
         "name": "EENHOORN RUILEN",
         "type": "MAGICAL",
-        "image": "images/cards/magische-effect-3.jpg",
+        "image": "resources/images/cards/magische-effect-3.jpg",
         "effect": "swap_stable",
         "effect_trigger": "once"
     },
     {
         "name": "GLITTERTORNADO",
         "type": "MAGICAL",
-        "image": "images/cards/magische-effect-4.jpg",
+        "image": "resources/images/cards/magische-effect-4.jpg",
         "effect": "everyone_stable_to_hand",
         "effect_trigger": "once"
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-1.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-1.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE NARWAL",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-2.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-2.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-3.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-3.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-3.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-3.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-3.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-3.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-3.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-3.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-3.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-3.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-3.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-3.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-3.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-3.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-3.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-3.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "NORMALE EENHOORN",
         "type": "BASIC_UNICORN",
-        "image": "images/cards/normale-eenhoorn-4.jpg",
+        "image": "resources/images/cards/normale-eenhoorn-4.jpg",
         "effect": null,
         "effect_trigger": null
     },
     {
         "name": "BEWAPENDE STAL",
         "type": "UPGRADE",
-        "image": "images/cards/upgrade-1.jpg",
+        "image": "resources/images/cards/upgrade-1.jpg",
         "effect": "discard2_destroy_unicorn",
         "effect_trigger": "on_turn_begin"
     },
     {
         "name": "BEWAPENDE STAL",
         "type": "UPGRADE",
-        "image": "images/cards/upgrade-2.jpg",
+        "image": "resources/images/cards/upgrade-2.jpg",
         "effect": "discard2_destroy_unicorn",
         "effect_trigger": "on_turn_begin"
     },
     {
         "name": "BEWAPENDE STAL",
         "type": "UPGRADE",
-        "image": "images/cards/upgrade-3.jpg",
+        "image": "resources/images/cards/upgrade-3.jpg",
         "effect": "discard2_destroy_unicorn",
         "effect_trigger": "on_turn_begin"
     },
     {
         "name": "GRIJPMACHINE",
         "type": "UPGRADE",
-        "image": "images/cards/upgrade-4.jpg",
+        "image": "resources/images/cards/upgrade-4.jpg",
         "effect": "discard_draw",
         "effect_trigger": "on_turn_begin"
     }

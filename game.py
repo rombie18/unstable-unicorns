@@ -376,7 +376,7 @@ class Game:
         self.discard_pile = DiscardPile()
 
         # Read all cards from JSON and put in deck
-        with open('cards.json', 'r', encoding='utf-8') as file:
+        with open('resources/cards.json', 'r', encoding='utf-8') as file:
             file_contents = file.read()
             cards = json.loads(file_contents)
             card_objs = []
@@ -619,7 +619,7 @@ class GUI(UI):
 
         self.window = arcade.Window(
             SCREEN_WIDTH, SCREEN_HEIGHT, "Unstable Unicorns", resizable=False, fullscreen=True)
-        self.window.set_icon(pyglet_load("images/icon.png"))
+        self.window.set_icon(pyglet_load("resources/images/icon.png"))
 
         players = [
             Player("Wout"),
@@ -721,7 +721,7 @@ class MainMenuView(arcade.View):
 
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
 
-        self.texture = arcade.load_texture("images/background_menu.jpg")
+        self.texture = arcade.load_texture("resources/images/background_menu.jpg")
 
         center_box = arcade.gui.UIBoxLayout()
         bottom_box = arcade.gui.UIBoxLayout()
@@ -783,7 +783,7 @@ class MainMenuView(arcade.View):
                 child=bottom_box)
         )
 
-        self.music = arcade.Sound("sounds/soundtrack.mp3", streaming=True)
+        self.music = arcade.Sound("resources/sounds/soundtrack.mp3", streaming=True)
         self.player = self.music.play(0.3)
 
     def on_click_start(self, event):
@@ -817,7 +817,7 @@ class PauseMenuView(arcade.View):
 
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
 
-        self.texture = arcade.load_texture("images/background_menu.jpg")
+        self.texture = arcade.load_texture("resources/images/background_menu.jpg")
 
         center_box = arcade.gui.UIBoxLayout()
         bottom_box = arcade.gui.UIBoxLayout()
@@ -917,7 +917,7 @@ class GameView(arcade.View):
     def on_show(self):
 
         self.manager.enable()
-        self.background = arcade.load_texture("images/background_game.jpg")
+        self.background = arcade.load_texture("resources/images/background_game.jpg")
         self.card_sprites = arcade.SpriteList()
 
         default_style = {
