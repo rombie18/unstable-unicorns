@@ -1,12 +1,17 @@
+import arcade as arcade2
 import random
 import json
 import logging
 from typing import Type
 import inquirer
-import arcade
 import arcade.gui
 from pyglet.image import load as pyglet_load
 import threading
+
+import sys
+import arcade as arcade
+del sys.modules['arcade']
+
 
 class EffectHandler:
     def __init__(self, game):
@@ -14,7 +19,8 @@ class EffectHandler:
 
     def handle_effect(self, card: 'Card', target_player: 'Player' = None):
 
-        logging.info("Applying effect '%s' to target '%s'", card.effect, target_player)
+        logging.info("Applying effect '%s' to target '%s'",
+                     card.effect, target_player)
 
         if card.effect == "discard_unicorn_draw":
             card = self.game.ui.select_card("Please select a Unicorn card to discard",
@@ -353,6 +359,7 @@ class Game:
 
         self.effect_handler: EffectHandler = None
         self.current_player: Player = None
+        self.turn_phase = None
 
         self.deck: Deck = None
         self.discard_pile: DiscardPile = None
@@ -421,80 +428,103 @@ class Game:
 
         # Determine the starting player
         self.current_player = self.players[0]
+        self.turn_phase = "Begin"
 
         logging.info("Game initialised!")
         logging.info("---")
 
     def start_turn(self):
-        logging.info("Starting turn")
+        try:
+            if self.turn_phase == "Begin":
 
-        logging.info("Current player is '%s'", self.current_player)
-        logging.info("Player has stable '%s'", self.current_player.stable)
-        logging.info("Player has hand '%s'", self.current_player.hand)
+                logging.info("Starting turn")
 
-        # Phase 1: Apply effects in stable that trigger on the beginning of turn
-        logging.info("Turn phase 1: Apply effects in stable")
-        for card in self.current_player.stable.get_cards():
-            if card.effect_trigger == "on_turn_begin":
-                self.effect_handler.handle_effect(card)
-        self.ui.update()
+                logging.info("Current player is '%s'", self.current_player)
+                logging.info("Player has stable '%s'",
+                             self.current_player.stable)
+                logging.info("Player has hand '%s'", self.current_player.hand)
 
-        # Phase 2: Draw a card and add it to the current player's hand
-        logging.info("Turn phase 2: Draw from Deck")
-        card = self.deck.draw_card()
-        self.current_player.add_to_hand(card)
-        self.ui.update()
+                # Phase 1: Apply effects in stable that trigger on the beginning of turn
+                logging.info("Turn phase 1: Apply effects in stable")
+                for card in self.current_player.stable.get_cards():
+                    if card.effect_trigger == "on_turn_begin":
+                        self.effect_handler.handle_effect(card)
 
-        # Phase 3: Play or draw a card
-        logging.info("Turn phase 3: Play or Draw")
-        options = ["Play a card", "Draw a card"]
-        option = self.ui.select_option(
-            "Do you want to play a card or draw a card?", options)
-        if option == options[0]:
-            card = self.ui.select_card(
-                "Please pick a card to play", self.current_player.hand.get_cards())
-            logging.info("Player selected %s", card)
-            if isinstance(card, MagicCard):
-                # If card is a Magic card, apply effect and move card to discard pile
-                self.current_player.remove_from_hand(card)
-                self.discard_pile.add_card(card)
-                self.effect_handler.handle_effect(card)
-            elif isinstance(card, MagicalUnicornCard):
-                # If card is a Magical Unicorn card, move card to stable and apply effect
-                self.current_player.remove_from_hand(card)
-                self.current_player.stable.add_card(card)
-                self.effect_handler.handle_effect(card)
-            elif isinstance(card, (DowngradeCard, UpgradeCard)):
-                # If card is Upgrade or Downgrade, move card to selected player stable
-                player = self.ui.select_player(
-                    "Please choose a player to put the Up/Downgrade card in their stable", self.players)
-                self.current_player.remove_from_hand(card)
-                player.add_to_stable(card)
-                if card.effect_trigger in ["once", "once_reversable"]:
-                    self.effect_handler.handle_effect(card, player)
-            elif isinstance(card, BasicUnicornCard):
-                # If card is Basic Unicorn, move card to stable
-                self.current_player.remove_from_hand(card)
-                self.current_player.add_to_stable(card)
-        else:
-            card = self.deck.draw_card()
-            self.current_player.add_to_hand(card)
-        self.ui.update()
+                self.ui.update()
+                self.turn_phase = "Draw"
 
-        # Phase 4: Discard until hand does not exceed 7 cards
-        logging.info("Turn phase 4: Discard until max 7")
-        while len(self.current_player.hand) > 7:
-            card = self.ui.select_card(
-                "Please pick a card to discard until hand does not exceed 7", self.current_player.hand.get_cards())
-            self.current_player.hand.remove_card(card)
-            self.ui.update()
+            elif self.turn_phase == "Draw":
 
-        # Check for victory conditions
-        if self.current_player.stable.get_unicorn_count() >= 7:
-            print(f"{self.current_player.name} wins!")
-            exit()
-        # Hand turn to next player
-        self.next_player()
+                # Phase 2: Draw a card and add it to the current player's hand
+                logging.info("Turn phase 2: Draw from Deck")
+                card = self.deck.draw_card()
+                self.current_player.add_to_hand(card)
+
+                self.ui.update()
+                self.turn_phase = "Action"
+
+            elif self.turn_phase == "Action":
+
+                # Phase 3: Play or draw a card
+                logging.info("Turn phase 3: Play or Draw")
+                options = ["Play a card", "Draw a card"]
+                option = self.ui.select_option(
+                    "Do you want to play a card or draw a card?", options)
+                if option == options[0]:
+                    card = self.ui.select_card(
+                        "Please pick a card to play", self.current_player.hand.get_cards())
+                    logging.info("Player selected %s", card)
+                    if isinstance(card, MagicCard):
+                        # If card is a Magic card, apply effect and move card to discard pile
+                        self.current_player.remove_from_hand(card)
+                        self.discard_pile.add_card(card)
+                        self.effect_handler.handle_effect(card)
+                    elif isinstance(card, MagicalUnicornCard):
+                        # If card is a Magical Unicorn card, move card to stable and apply effect
+                        self.current_player.remove_from_hand(card)
+                        self.current_player.stable.add_card(card)
+                        self.effect_handler.handle_effect(card)
+                    elif isinstance(card, (DowngradeCard, UpgradeCard)):
+                        # If card is Upgrade or Downgrade, move card to selected player stable
+                        player = self.ui.select_player(
+                            "Please choose a player to put the Up/Downgrade card in their stable", self.players)
+                        self.current_player.remove_from_hand(card)
+                        player.add_to_stable(card)
+                        if card.effect_trigger in ["once", "once_reversable"]:
+                            self.effect_handler.handle_effect(card, player)
+                    elif isinstance(card, BasicUnicornCard):
+                        # If card is Basic Unicorn, move card to stable
+                        self.current_player.remove_from_hand(card)
+                        self.current_player.add_to_stable(card)
+                else:
+                    card = self.deck.draw_card()
+                    self.current_player.add_to_hand(card)
+
+                self.ui.update()
+                self.turn_phase = "Discard"
+
+            elif self.turn_phase == "Discard":
+
+                # Phase 4: Discard until hand does not exceed 7 cards
+                logging.info("Turn phase 4: Discard until max 7")
+                while len(self.current_player.hand) > 7:
+                    card = self.ui.select_card(
+                        "Please pick a card to discard until hand does not exceed 7", self.current_player.hand.get_cards())
+                    self.current_player.hand.remove_card(card)
+                    self.discard_pile.add_card(card)
+                    self.ui.update()
+
+                # Check for victory conditions
+                if self.current_player.stable.get_unicorn_count() >= 7:
+                    self.ui.display_message(
+                        "Player %s is gewonnen!", self.current_player)
+
+                # Hand turn to next player
+                self.next_player()
+                self.turn_phase = "Begin"
+
+        except Exception as e:
+            self.ui.display_error(str(e))
 
     def next_player(self):
         # Find the next player in the list of players
@@ -581,29 +611,14 @@ class CLI(UI):
         return answers["option"]
 
 
-
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 
-class ResultEvent:
-    def __init__(self):
-        self.event = threading.Event()
-        self.result = None
-
-    def wait(self):
-        self.event.wait()
-        return self.result
-    
-    def result_available(self):
-        return self.event.is_set()
-
-    def set_result(self, result):
-        self.result = result
-        self.event.set()
 
 class GUI(UI):
     def __init__(self):
-        
-        self.window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Unstable Unicorns", resizable=False, fullscreen=True)
+
+        self.window = arcade.Window(
+            SCREEN_WIDTH, SCREEN_HEIGHT, "Unstable Unicorns", resizable=False, fullscreen=True)
         self.window.set_icon(pyglet_load("images/icon.png"))
 
         players = [
@@ -616,22 +631,21 @@ class GUI(UI):
         menu_view = MainMenuView(self.game)
         self.window.show_view(menu_view)
         arcade.run()
-        
+
     def update(self):
         logging.debug("GUI received update event")
         self.window.current_view.on_draw()
-        
+
     def display_error(self, message: str):
         logging.debug("GUI displaying error box")
         message_box = arcade.gui.UIMessageBox(
             width=300,
             height=200,
             message_text=(
-                "Oeps, er liep iets fout!"
-                "%s", message
+                "Oeps, er liep iets fout!\n\n" + str(message)
             ),
             callback=arcade.exit,
-            buttons=["Ok"]
+            buttons=["Spel aflsuiten"]
         )
 
         self.window.current_view.manager.add(message_box)
@@ -642,8 +656,7 @@ class GUI(UI):
             width=300,
             height=200,
             message_text=(
-                "Opgelet!"
-                "%s", message
+                "Opgelet!\n\n" + str(message)
             ),
             buttons=["Ok"]
         )
@@ -651,50 +664,46 @@ class GUI(UI):
         self.window.current_view.manager.add(message_box)
 
     def select_card(self, message: str, cards: 'list[Card]') -> 'Card':
-        def on_message_box_close(selection):
-            for card in cards:
-                if str(card) == selection:
-                    return card
-        
-        message_box = arcade.gui.UIMessageBox(
-            width=300,
-            height=200,
-            message_text=message,
-            callback=on_message_box_close,
-            buttons=cards
-        )
-        
-        self.window.current_view.manager.add(message_box)
+        if len(cards) == 0:
+            logging.warning("There are no valid Cards to select from")
+            return
+
+        questions = [
+            inquirer.List('card',
+                          message=message,
+                          choices=cards,
+                          ),
+        ]
+        answers = inquirer.prompt(questions)
+        return answers["card"]
 
     def select_player(self, message: str, players: 'list[Player]') -> 'Player':
-        def on_message_box_close(selection):
-            for player in players:
-                if str(player) == selection:
-                    return player
-        
-        message_box = arcade.gui.UIMessageBox(
-            width=300,
-            height=200,
-            message_text=message,
-            callback=on_message_box_close,
-            buttons=players
-        )
-        
-        self.window.current_view.manager.add(message_box)
+        if len(players) == 0:
+            logging.warning("There are no valid Players to select from")
+            return
+
+        questions = [
+            inquirer.List('player',
+                          message=message,
+                          choices=players,
+                          ),
+        ]
+        answers = inquirer.prompt(questions)
+        return answers["player"]
 
     def select_option(self, message: str, options: 'list[str]') -> str:
-        def on_message_box_close(selection):
-            return selection
-                
-        message_box = arcade.gui.UIMessageBox(
-            width=300,
-            height=200,
-            message_text=message,
-            callback=on_message_box_close,
-            buttons=options
-        )
-        
-        self.window.current_view.manager.add(message_box)
+        if len(options) == 0:
+            logging.warning("There are no valid Options to select from")
+            return
+
+        questions = [
+            inquirer.List('option',
+                          message=message,
+                          choices=options,
+                          ),
+        ]
+        answers = inquirer.prompt(questions)
+        return answers["option"]
 
 
 class MainMenuView(arcade.View):
@@ -704,7 +713,7 @@ class MainMenuView(arcade.View):
         self.manager = arcade.gui.UIManager()
         self.player = None
         self.music = None
-        
+
         self.texture = None
 
     def on_show(self):
@@ -893,6 +902,7 @@ class CardSprite(arcade.Sprite):
         # Call the parent
         super().__init__(self.card.image, 0.105, hit_box_algorithm="None")
 
+
 class GameView(arcade.View):
 
     def __init__(self, game: Game):
@@ -903,13 +913,13 @@ class GameView(arcade.View):
         self.v_box = arcade.gui.UIBoxLayout()
         self.h_box = arcade.gui.UIBoxLayout(vertical=False)
         self.card_sprites = None
-        
+
     def on_show(self):
-        
+
         self.manager.enable()
         self.background = arcade.load_texture("images/background_game.jpg")
         self.card_sprites = arcade.SpriteList()
-        
+
         default_style = {
             "font_name": ("calibri", "arial"),
             "font_size": 15,
@@ -922,17 +932,26 @@ class GameView(arcade.View):
             "font_color_pressed": arcade.color.BLACK,
         }
 
-        spelregels_button = arcade.gui.UIFlatButton(text="Spelregels", width=200, style=default_style)
-        self.v_box.add(spelregels_button.with_space_around(bottom=10, top=20, right=20))
+        spelregels_button = arcade.gui.UIFlatButton(
+            text="Spelregels", width=200, style=default_style)
+        self.v_box.add(spelregels_button.with_space_around(
+            bottom=10, top=20, right=20))
+        spelregels_button.on_click = lambda event: self.game.ui.display_message(
+            "Ga naar de website om de spelregels te bekijken.")
 
-        exit_button = arcade.gui.UIFlatButton(text="Afsluiten", width=200, style=default_style)
+        exit_button = arcade.gui.UIFlatButton(
+            text="Afsluiten", width=200, style=default_style)
         self.v_box.add(exit_button.with_space_around(bottom=10, right=20))
-        
-        next_turn_phase_button = arcade.gui.UIFlatButton(text="Volgende fase", width=200, style=default_style)
-        self.h_box.add(next_turn_phase_button.with_space_around(right=10, bottom=20))
+        exit_button.on_click = arcade.exit
+
+        next_turn_phase_button = arcade.gui.UIFlatButton(
+            text="Volgende fase", width=200, style=default_style)
+        self.h_box.add(
+            next_turn_phase_button.with_space_around(right=10, bottom=20))
         next_turn_phase_button.on_click = lambda event: self.game.start_turn()
 
-        end_turn_button = arcade.gui.UIFlatButton(text="Beurt beëindigen", width=200, style=default_style)
+        end_turn_button = arcade.gui.UIFlatButton(
+            text="Beurt beëindigen", width=200, style=default_style)
         self.h_box.add(end_turn_button.with_space_around(right=20, bottom=20))
         end_turn_button.on_click = lambda event: self.game.next_player()
 
@@ -942,60 +961,61 @@ class GameView(arcade.View):
                 anchor_y="top",
                 child=self.v_box)
         )
-        
+
         self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="right",
                 anchor_y="bottom",
                 child=self.h_box)
         )
-        
+
     def on_draw(self):
         self.clear()
-        arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
-        
+        arcade.draw_lrwh_rectangle_textured(
+            0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+
         self.card_sprites.clear()
 
         # Fill up player stable slots
         for i, card in enumerate(self.game.players[0].stable.get_cards()):
             card_sprite = CardSprite(card)
-            card_sprite.position = 58 + i*107, 1080-182
+            card_sprite.position = 58 + i*107, 1080-187
             card_sprite.scale = 0.105
             if not card.playable:
                 card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
-            
+
         arcade.draw_text(self.game.players[0].name,
-                        780,
-                        1080-153,
-                        arcade.color.BLACK)
-            
+                         780,
+                         1080-153,
+                         arcade.color.BLACK)
+
         for i, card in enumerate(self.game.players[1].stable.get_cards()):
             card_sprite = CardSprite(card)
-            card_sprite.position = 58 + i*107, 1080-380
+            card_sprite.position = 58 + i*107, 1080-387
             card_sprite.scale = 0.105
             if not card.playable:
                 card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
-            
+
         arcade.draw_text(self.game.players[1].name,
-                        808,
-                        1080-369,
-                        arcade.color.BLACK)
-            
+                         808,
+                         1080-369,
+                         arcade.color.BLACK)
+
         for i, card in enumerate(self.game.players[2].stable.get_cards()):
             card_sprite = CardSprite(card)
-            card_sprite.position = 58 + i*107, 1080-580
+            card_sprite.position = 58 + i*107, 1080-587
             card_sprite.scale = 0.105
             if not card.playable:
                 card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
-            
+
         arcade.draw_text(self.game.players[2].name,
-                        765,
-                        1080-578,
-                        arcade.color.BLACK)
-            
+                         765,
+                         1080-578,
+                         arcade.color.BLACK)
+
         # Fill up player hand slots
         for i, card in enumerate(self.game.current_player.hand.get_cards()):
             card_sprite = CardSprite(card)
@@ -1004,7 +1024,7 @@ class GameView(arcade.View):
             if not card.playable:
                 card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
-            
+
         # Fill up deck slot
         for i, card in enumerate(self.game.deck.get_cards()):
             card_sprite = CardSprite(card)
@@ -1013,7 +1033,7 @@ class GameView(arcade.View):
             if not card.playable:
                 card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
-            
+
         # Fill up deck slot
         for i, card in enumerate(self.game.discard_pile.get_cards()):
             card_sprite = CardSprite(card)
@@ -1022,7 +1042,7 @@ class GameView(arcade.View):
             if not card.playable:
                 card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
-            
+
         # Fill up deck slot
         for i, card in enumerate(self.game.nursery.get_cards()):
             card_sprite = CardSprite(card)
@@ -1031,10 +1051,19 @@ class GameView(arcade.View):
             if not card.playable:
                 card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
-            
-        self.manager.draw()
-        self.card_sprites.draw()        
 
+        arcade.draw_text("Aan de beurt: " + self.game.current_player.name,
+                         1419,
+                         1080-969,
+                         arcade.color.BLACK)
+
+        arcade.draw_text("Beurt fase: " + self.game.turn_phase,
+                         1708,
+                         1080-965,
+                         arcade.color.BLACK)
+
+        self.manager.draw()
+        self.card_sprites.draw()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
