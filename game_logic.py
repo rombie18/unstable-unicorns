@@ -6,15 +6,15 @@ import inquirer
 import arcade
 import arcade.gui
 from pyglet.image import load as pyglet_load
-
+import threading
 
 class EffectHandler:
     def __init__(self, game):
         self.game: Game = game
 
-    def handle_effect(self, card: 'Card'):
+    def handle_effect(self, card: 'Card', target_player: 'Player' = None):
 
-        logging.info("Applying effect '%s'", card.effect)
+        logging.info("Applying effect '%s' to target '%s'", card.effect, target_player)
 
         if card.effect == "discard_unicorn_draw":
             card = self.game.ui.select_card("Please select a Unicorn card to discard",
@@ -34,16 +34,14 @@ class EffectHandler:
                 self.game.current_player.stable.remove_card(card)
                 self.game.discard_pile.add_card(card)
         elif card.effect == "invincible_unicorns":
-            # TODO
-            cards = self.game.current_player.hand.get_cards_by_class_type(
+            cards = target_player.hand.get_cards_by_class_type(
                 UnicornCard)
             cards.extend(
-                self.game.current_player.stable.get_cards_by_class_type(UnicornCard))
+                target_player.stable.get_cards_by_class_type(UnicornCard))
             for card in cards:
                 card.invincible = True
         elif card.effect == "unable_upgrade":
-            # TODO
-            cards = self.game.current_player.hand.get_cards_by_class_type(
+            cards = target_player.hand.get_cards_by_class_type(
                 UpgradeCard)
             for card in cards:
                 card.playable = False
@@ -472,6 +470,8 @@ class Game:
                     "Please choose a player to put the Up/Downgrade card in their stable", self.players)
                 self.current_player.remove_from_hand(card)
                 player.add_to_stable(card)
+                if card.effect_trigger in ["once", "once_reversable"]:
+                    self.effect_handler.handle_effect(card, player)
             elif isinstance(card, BasicUnicornCard):
                 # If card is Basic Unicorn, move card to stable
                 self.current_player.remove_from_hand(card)
@@ -504,6 +504,7 @@ class Game:
         logging.info("Advancing player '%s' to '%s'",
                      self.players[current_index], self.players[next_index])
         logging.info("---")
+        self.ui.update()
 
 
 class UI:
@@ -583,6 +584,22 @@ class CLI(UI):
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 
+class ResultEvent:
+    def __init__(self):
+        self.event = threading.Event()
+        self.result = None
+
+    def wait(self):
+        self.event.wait()
+        return self.result
+    
+    def result_available(self):
+        return self.event.is_set()
+
+    def set_result(self, result):
+        self.result = result
+        self.event.set()
+
 class GUI(UI):
     def __init__(self):
         
@@ -601,56 +618,83 @@ class GUI(UI):
         arcade.run()
         
     def update(self):
-        print("received update event")
+        logging.debug("GUI received update event")
         self.window.current_view.on_draw()
         
     def display_error(self, message: str):
-        logging.error(message)
+        logging.debug("GUI displaying error box")
+        message_box = arcade.gui.UIMessageBox(
+            width=300,
+            height=200,
+            message_text=(
+                "Oeps, er liep iets fout!"
+                "%s", message
+            ),
+            callback=arcade.exit,
+            buttons=["Ok"]
+        )
+
+        self.window.current_view.manager.add(message_box)
 
     def display_message(self, message: str):
-        logging.info(message)
+        logging.debug("GUI displaying info box")
+        message_box = arcade.gui.UIMessageBox(
+            width=300,
+            height=200,
+            message_text=(
+                "Opgelet!"
+                "%s", message
+            ),
+            buttons=["Ok"]
+        )
+
+        self.window.current_view.manager.add(message_box)
 
     def select_card(self, message: str, cards: 'list[Card]') -> 'Card':
-        if len(cards) == 0:
-            logging.warning("There are no valid Cards to select from")
-            return
-
-        questions = [
-            inquirer.List('card',
-                          message=message,
-                          choices=cards,
-                          ),
-        ]
-        answers = inquirer.prompt(questions)
-        return answers["card"]
+        def on_message_box_close(selection):
+            for card in cards:
+                if str(card) == selection:
+                    return card
+        
+        message_box = arcade.gui.UIMessageBox(
+            width=300,
+            height=200,
+            message_text=message,
+            callback=on_message_box_close,
+            buttons=cards
+        )
+        
+        self.window.current_view.manager.add(message_box)
 
     def select_player(self, message: str, players: 'list[Player]') -> 'Player':
-        if len(players) == 0:
-            logging.warning("There are no valid Players to select from")
-            return
-
-        questions = [
-            inquirer.List('player',
-                          message=message,
-                          choices=players,
-                          ),
-        ]
-        answers = inquirer.prompt(questions)
-        return answers["player"]
+        def on_message_box_close(selection):
+            for player in players:
+                if str(player) == selection:
+                    return player
+        
+        message_box = arcade.gui.UIMessageBox(
+            width=300,
+            height=200,
+            message_text=message,
+            callback=on_message_box_close,
+            buttons=players
+        )
+        
+        self.window.current_view.manager.add(message_box)
 
     def select_option(self, message: str, options: 'list[str]') -> str:
-        if len(options) == 0:
-            logging.warning("There are no valid Options to select from")
-            return
-
-        questions = [
-            inquirer.List('option',
-                          message=message,
-                          choices=options,
-                          ),
-        ]
-        answers = inquirer.prompt(questions)
-        return answers["option"]
+        def on_message_box_close(selection):
+            return selection
+                
+        message_box = arcade.gui.UIMessageBox(
+            width=300,
+            height=200,
+            message_text=message,
+            callback=on_message_box_close,
+            buttons=options
+        )
+        
+        self.window.current_view.manager.add(message_box)
 
 
 class MainMenuView(arcade.View):
@@ -910,11 +954,15 @@ class GameView(arcade.View):
         self.clear()
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         
+        self.card_sprites.clear()
+
         # Fill up player stable slots
         for i, card in enumerate(self.game.players[0].stable.get_cards()):
             card_sprite = CardSprite(card)
             card_sprite.position = 58 + i*107, 1080-182
             card_sprite.scale = 0.105
+            if not card.playable:
+                card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
             
         arcade.draw_text(self.game.players[0].name,
@@ -926,6 +974,8 @@ class GameView(arcade.View):
             card_sprite = CardSprite(card)
             card_sprite.position = 58 + i*107, 1080-380
             card_sprite.scale = 0.105
+            if not card.playable:
+                card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
             
         arcade.draw_text(self.game.players[1].name,
@@ -937,6 +987,8 @@ class GameView(arcade.View):
             card_sprite = CardSprite(card)
             card_sprite.position = 58 + i*107, 1080-580
             card_sprite.scale = 0.105
+            if not card.playable:
+                card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
             
         arcade.draw_text(self.game.players[2].name,
@@ -949,6 +1001,8 @@ class GameView(arcade.View):
             card_sprite = CardSprite(card)
             card_sprite.position = 258 + i*137, 1080-950
             card_sprite.scale = 0.14
+            if not card.playable:
+                card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
             
         # Fill up deck slot
@@ -956,6 +1010,8 @@ class GameView(arcade.View):
             card_sprite = CardSprite(card)
             card_sprite.position = 1254, 1080-411
             card_sprite.scale = 0.185
+            if not card.playable:
+                card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
             
         # Fill up deck slot
@@ -963,6 +1019,8 @@ class GameView(arcade.View):
             card_sprite = CardSprite(card)
             card_sprite.position = 1440, 1080-411
             card_sprite.scale = 0.185
+            if not card.playable:
+                card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
             
         # Fill up deck slot
@@ -970,10 +1028,12 @@ class GameView(arcade.View):
             card_sprite = CardSprite(card)
             card_sprite.position = 1625, 1080-411
             card_sprite.scale = 0.185
+            if not card.playable:
+                card_sprite.alpha = 128
             self.card_sprites.append(card_sprite)
             
         self.manager.draw()
-        self.card_sprites.draw()
+        self.card_sprites.draw()        
 
 
     def on_mouse_press(self, x, y, button, key_modifiers):
