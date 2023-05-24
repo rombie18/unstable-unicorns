@@ -1,17 +1,15 @@
-import arcade as arcade2
+import sys, os
+
+os.chdir(sys._MEIPASS)
+
 import random
 import json
 import logging
-from typing import Type
 import inquirer
+import arcade
 import arcade.gui
 from pyglet.image import load as pyglet_load
-import threading
-
-import sys
-import arcade as arcade
-del sys.modules['arcade']
-
+from typing import Type
 
 class EffectHandler:
     def __init__(self, game):
